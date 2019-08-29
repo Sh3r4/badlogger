@@ -150,7 +150,7 @@ func DebugNP(s string) {
 }
 
 func Log(s string) {
-	log.Println(s)
+	h.log.Println(s)
 }
 
 func LogNP(s string) {
