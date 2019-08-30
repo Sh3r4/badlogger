@@ -16,7 +16,7 @@ var (
 	one sync.Once
 
 	// logger handles
-	h Handles
+	h Handles = crappyInit()
 
 	// colours
 	Green   = color.New(color.FgGreen, color.Bold)
@@ -64,6 +64,16 @@ type (
 		}
 	}
 )
+
+func crappyInit() Handles {
+	h.debug = setupLoggerWithDatesAndTimes(ioutil.Discard, Green, pDebug)
+	h.log = setupLoggerWithDatesAndTimes(os.Stdout, Green, pLog)
+	h.debugNP = setupLogger(ioutil.Discard, Green, "")
+	h.logNP = setupLogger(os.Stdout, Green, "")
+	h.warn = setupLoggerWithDatesAndTimes(os.Stdout, Magenta, pWarn)
+	h.error = setupLoggerWithDatesAndTimes(os.Stderr, Red, pErr)
+	return h
+}
 
 // NewCustomLogging applies the CustomConfig to the single logging instance
 func NewCustomLogging(config CustomConfig) {
