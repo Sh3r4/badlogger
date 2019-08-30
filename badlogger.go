@@ -16,7 +16,14 @@ var (
 	one sync.Once
 
 	// logger handles
-	h Handles = crappyInit()
+	h Handles = Handles{
+		debug:    setupLoggerWithDatesAndTimes(ioutil.Discard, Green, pDebug),
+		debugNP:  setupLogger(ioutil.Discard, Green, ""),
+		log:      setupLoggerWithDatesAndTimes(os.Stdout, Green, pLog),
+		logNP:    setupLogger(os.Stdout, Green, ""),
+		warn:     setupLoggerWithDatesAndTimes(os.Stdout, Magenta, pWarn),
+		error:    setupLoggerWithDatesAndTimes(os.Stderr, Red, pErr),
+	}
 
 	// colours
 	Green   = color.New(color.FgGreen, color.Bold)
@@ -42,7 +49,6 @@ type (
 		logNP    *log.Logger
 		warn     *log.Logger
 		error    *log.Logger
-		fatality *log.Logger
 	}
 
 	// CustomConfig represents a structure for setting the logging up using pre-built log handles
@@ -54,7 +60,6 @@ type (
 			LogNoPrefix   *log.Logger
 			Warn          *log.Logger
 			Error         *log.Logger
-			Fatal         *log.Logger
 		}
 		Prefixes struct {
 			Debug string
@@ -65,16 +70,6 @@ type (
 	}
 )
 
-func crappyInit() Handles {
-	h.debug = setupLoggerWithDatesAndTimes(ioutil.Discard, Green, pDebug)
-	h.log = setupLoggerWithDatesAndTimes(os.Stdout, Green, pLog)
-	h.debugNP = setupLogger(ioutil.Discard, Green, "")
-	h.logNP = setupLogger(os.Stdout, Green, "")
-	h.warn = setupLoggerWithDatesAndTimes(os.Stdout, Magenta, pWarn)
-	h.error = setupLoggerWithDatesAndTimes(os.Stderr, Red, pErr)
-	return h
-}
-
 // NewCustomLogging applies the CustomConfig to the single logging instance
 func NewCustomLogging(config CustomConfig) {
 	one.Do(func() {
@@ -84,7 +79,6 @@ func NewCustomLogging(config CustomConfig) {
 		h.logNP = config.LogHandles.LogNoPrefix
 		h.warn = config.LogHandles.Warn
 		h.error = config.LogHandles.Error
-		h.fatality = config.LogHandles.Fatal
 		pDebug = config.Prefixes.Debug
 		pLog = config.Prefixes.Log
 		pWarn = config.Prefixes.Warn
@@ -181,9 +175,9 @@ func Error(s string, err error) {
 
 func Fatal(s string, err error) {
 	if len(s) == 0 {
-		h.fatality.Fatalln(err)
+		h.error.Fatalln(err)
 	} else {
-		h.fatality.Fatalln(fmt.Sprintf("%s | %s", s, err))
+		h.error.Fatalln(fmt.Sprintf("%s | %s", s, err))
 	}
 }
 
